@@ -53,8 +53,9 @@ const BookingConfirmation = ({ route}:any) => {
         <View 
         style={{
           display:'flex',
-          flexDirection:'row',
-          justifyContent:'space-between'
+          flexDirection:'column',
+          justifyContent:'space-between',
+          gap:40
         }}
         >
         <View>
@@ -65,7 +66,7 @@ const BookingConfirmation = ({ route}:any) => {
         </View>
         <View>
         <Text style={styles.passengerText}>Arrival Airport</Text>
-        <Text style={styles.passengerText}>{params?.flightData?.source?.airport?.airportName} </Text>
+        <Text style={styles.passengerText}>{params?.flightData?.destination?.airport?.airportName} </Text>
         <Text style={styles.passengerText}>Arrival Time</Text>
         <Text style={styles.passengerText}>{formatDate(params?.flightData?.destination?.arrTime)}</Text>
         </View>

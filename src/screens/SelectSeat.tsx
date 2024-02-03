@@ -51,10 +51,10 @@ style={{
      //={flightData?.id!=undefined?false:true}
        style={{
         width:wp(96),
-        height: hp(5),
+        // height: hp(15),
         borderRadius:12,
-        marginTop:10
-        //backgroundColor:flightData?.id!=undefined?"#ADD8E6":'transparent'
+        marginTop:10,
+        backgroundColor:seats?.length>0?"#ADD8E6":'white'
       }}
       onPress={()=>{
         const params ={

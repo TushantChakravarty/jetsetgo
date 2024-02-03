@@ -20,18 +20,28 @@ import { flightsData } from "../api/Data";
 import { formatDate } from "../utils/utils";
 import { StackNavigatorRoutesProps } from "../routes/app.routes";
 import { useNavigation } from "@react-navigation/native";
+import Slider from '@react-native-community/slider';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 export default function Bookings() {
   const [showDropDown, setShowDropDown] = useState(false);
   const [departure, setDeparture] = useState<any>();
   const [destination, setDestination] = useState<any>();
+  const [airline, setAirline] = useState<any>();
   const [showDropDown2, setShowDropDown2] = useState(false);
+  const [showDropDown3, setShowDropDown3] = useState(false);
   const [flights, setFlights] = useState<any>(flightsData?.data?.result);
   const [flightData, setFlightData] = useState<any>();
   const [date, setDate] = useState<any>(null);
+  const [sliderValue, setSliderValue] = useState(0);
+
+  const handleSliderChange = (value:any) => {
+    setSliderValue(value);
+  };
   const navigation = useNavigation<any>();
 
   const destinations = [
+   
     {
       label: "Delhi",
       value: "Delhi",
@@ -83,6 +93,18 @@ export default function Bookings() {
     "28-03-2023",
     "27-03-2023",
   ];
+  const airlines = [
+    {
+      label: "JetSpice",
+      value: "JetSpice",
+    },
+    {
+      label: "Air India",
+      value: "Air India",
+    },
+
+    
+  ];
 
   useEffect(() => {
     //console.log(flightsData)
@@ -98,8 +120,10 @@ export default function Bookings() {
   // filterData()
   //   },[date])
   const filterData = () => {
-    if (departure && destination && date) {
+    if (departure && destination && date && airline && sliderValue) {
+     // console.log('running from here')
       const filter = flightsData?.data?.result?.filter((item: any) => {
+       console.log( item?.fare)
         const inputDateTime = new Date(item?.displayData?.source?.depTime);
         const formattedDate = `${inputDateTime
           .getDate()
@@ -110,12 +134,50 @@ export default function Bookings() {
         return (
           formattedDate == date &&
           item?.displayData?.source?.airport?.cityName == departure &&
-          item?.displayData?.destination?.airport?.cityName == destination
+          item?.displayData?.destination?.airport?.cityName == destination&&
+          item?.displayData?.airlines[0]?.airlineName == airline&&
+          item?.fare<=sliderValue
         );
       });
       // console.log('filter date',filter)
       setFlights(filter);
-    } else if (date && !departure && !destination) {
+    } 
+    else if (!departure && !destination && !date && airline && !sliderValue) {
+      //console.log('running from here')
+      const filter = flightsData?.data?.result?.filter((item: any) => {
+      // console.log( item?.fare)
+        return (
+          item?.displayData?.airlines[0]?.airlineName == airline
+        );
+      });
+      // console.log('filter date',filter)
+      setFlights(filter);
+    } 
+    else if (!departure && !destination && !date && !airline && sliderValue) {
+      console.log('running from here')
+      const filter = flightsData?.data?.result?.filter((item: any) => {
+      // console.log( item?.fare)
+        return (
+          item?.fare<=sliderValue
+        );
+      });
+      // console.log('filter date',filter)
+      setFlights(filter);
+    } 
+    else if (!departure && !destination && !date && airline && sliderValue) {
+      console.log('running from here')
+      const filter = flightsData?.data?.result?.filter((item: any) => {
+      // console.log( item?.fare)
+        return (
+          item?.fare<=sliderValue&&
+          item?.displayData?.airlines[0]?.airlineName == airline
+
+        );
+      });
+      // console.log('filter date',filter)
+      setFlights(filter);
+    } 
+    else if (date && !departure && !destination) {
       const filter = flightsData?.data?.result?.filter((item: any) => {
         const inputDateTime = new Date(item?.displayData?.source?.depTime);
         const formattedDate = `${inputDateTime
@@ -137,11 +199,18 @@ export default function Bookings() {
       });
       //console.log('filter date',filter)
       setFlights(filter);
-    } else if (!destination && !departure && !date) {
+    } else if (!destination && !departure && !date && !airline && !sliderValue) {
       setFlights(flightsData?.data?.result);
     }
   };
 
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: withSpring(1, { damping: 5, stiffness: 70 }),
+    };
+  });
+
+  
   const styles = StyleSheet.create({
     headerContainer: {
       marginVertical: hp(1),
@@ -155,8 +224,8 @@ export default function Bookings() {
       marginVertical: hp(1),
     },
     logo: {
-      width: 60,
-      height: 60,
+      width: 40,
+      height: 30,
       borderRadius: 60 / 2,
     },
     destinationContainer: {
@@ -226,9 +295,9 @@ export default function Bookings() {
   return (
     <View>
       <View style={styles.headerContainer}>
-        <View style={styles.logoContainer}>
+        {/* <View style={styles.logoContainer}>
           <Image source={Jahaaj} style={styles.logo} resizeMode="contain" />
-        </View>
+        </View> */}
 
         <View style={styles.destinationContainer}>
           <View>
@@ -323,6 +392,64 @@ export default function Bookings() {
             list={destinations}
           />
         </View>
+        <View
+          style={{
+            display:'flex',
+            flexDirection:'row',
+            justifyContent:'space-between'
+          }}
+        >
+        <DropDown
+            label={"Airlines"}
+            dropDownStyle={{
+              backgroundColor: "white",
+            }}
+            dropDownItemTextStyle={{
+              color: "black",
+              backgroundColor: "white",
+            }}
+            dropDownItemSelectedStyle={{
+              backgroundColor: "white",
+            }}
+            dropDownItemStyle={{
+              backgroundColor: "white",
+            }}
+            dropDownItemSelectedTextStyle={{
+              backgroundColor: "white",
+            }}
+            inputProps={{
+              style: {
+                backgroundColor: "white",
+                marginLeft:wp(1.5)
+              },
+            }}
+            // theme={{
+
+            // }}
+            mode={"outlined"}
+            visible={showDropDown3}
+            showDropDown={() => setShowDropDown3(true)}
+            onDismiss={() => setShowDropDown3(false)}
+            value={airline ? airline : ""}
+            setValue={setAirline}
+            list={airlines}
+          />
+           <View>
+           <Slider
+        style={{ width: 200, height: 40 }}
+        minimumValue={0}
+        maximumValue={10000}
+        minimumTrackTintColor="#FFFFFF"
+        maximumTrackTintColor="#000000"
+        onValueChange={handleSliderChange}
+      />
+     <Animated.View style={animatedStyle}>
+        <Text style={{ marginTop: 20, fontSize: 18, fontWeight: 'bold' }}>
+          Price: {sliderValue.toFixed(2)}
+        </Text>
+      </Animated.View>
+    </View>
+          </View>
         <View style={styles.scrollDatesContainer}>
           <Icon name="chevron-left" size={24} />
           <ScrollView
@@ -359,7 +486,7 @@ export default function Bookings() {
 
       <View
         style={{
-          marginTop: hp(1),
+          //marginTop: hp(1),
           marginHorizontal: wp(2),
           flexDirection: "row",
           display: "flex",
@@ -385,7 +512,7 @@ export default function Bookings() {
           <Text>filter</Text>
         </Button>
 
-        <Button
+        {/* <Button
           mode="elevated"
           style={{
             width: wp(25),
@@ -397,6 +524,8 @@ export default function Bookings() {
             setDate(null);
             setDestination(undefined);
             setDeparture(undefined);
+            setAirline(undefined)
+            setSliderValue(0)
             filterData();
             // getFlightBookings()
             // .then((response:any)=>{
@@ -406,12 +535,12 @@ export default function Bookings() {
           }}
         >
           <Text>reset</Text>
-        </Button>
+        </Button> */}
       </View>
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{
-          marginTop: hp(2),
+         marginTop: hp(1),
           height: hp(40),
           paddingBottom: hp(4),
         }}
@@ -551,7 +680,9 @@ export default function Bookings() {
             // })
           }}
         >
-          <Text>Next</Text>
+          <Text style={{
+            color:'black'
+          }}>Next</Text>
         </Button>
       </View>
     </View>
